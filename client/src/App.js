@@ -9,6 +9,12 @@ import {
   Form,
 } from "react-bootstrap";
 
+const ws = new WebSocket("ws://localhost:8765");
+
+ws.onopen = () => {
+  console.log("websocket connected");
+};
+
 const CARDS_VALUE = [1, 2, 3, 5, 8, 13, 21];
 
 const STEP = {
@@ -18,33 +24,39 @@ const STEP = {
 
 function App() {
   const [selectedCard, setSelectedCard] = useState(null);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [step, setStep] = useState(STEP.REGISTER);
-  const [ws, setWs] = useState(null)
+  const [users, setUsers] = useState({});
+
+  ws.onmessage = (message) => {
+    const action = JSON.parse(message.data);
+    handleReceiveMessage(action);
+  };
 
   const handleReceiveMessage = (action) => {
-    const {payload, type} = action
+    const { payload, type } = action;
     switch (type) {
-      case "USER_REGISTERED":
+      case "REGISTERED_SUCCESS":
         setStep(STEP.SELECTING);
         break;
+      case "USER_REGISTERED":
+        const initialUsers = {...users}
+        payload.users.forEach(user => {
+          if (users.hasOwnProperty(user)) return
+          initialUsers[user] = null
+        })
+        setUsers(initialUsers);
+        break;
+      case "USER_SELECTED_CARD":
+        setUsers({
+          ...users,
+          [payload.username]: payload.card
+        })
+        break;
     }
-  }
+  };
 
-  useEffect(() => {
-    const wsConnection = new WebSocket("ws://localhost:8765")
-
-    wsConnection.onopen = () => {
-      console.log("websocket connected");
-    };
-
-    wsConnection.onmessage = (message) => {
-      const action = JSON.parse(message.data)
-      handleReceiveMessage(action)
-    };
-
-    setWs(wsConnection)
-  }, []);
+  useEffect(() => {}, []);
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
@@ -84,7 +96,9 @@ function App() {
                 />
               </Col>
               <Col sm="3">
-                <Button type="submit" size="lg">Entrar</Button>
+                <Button type="submit" size="lg">
+                  Entrar
+                </Button>
               </Col>
             </Form.Group>
           </Form>
@@ -103,6 +117,9 @@ function App() {
               </Col>
             ))}
           </Row>
+          {Object.keys(users).map(key => (
+            <p key={key}>{key}: {users[key]}</p>
+          ))}
           {selectedCard && (
             <h1 className="text-center mt-5">Você selecionou {selectedCard}</h1>
           )}
