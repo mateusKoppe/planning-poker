@@ -1,7 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 
-import HomeTableImg from "../../assets/images/home-table.png";
+import Ui from "components/Ui/index";
+
+import HomeTableImg from "assets/images/home-table.png";
+
+const { Button } = Ui;
+
 
 const Wrapper = styled.div`
   min-height: 100vh;
@@ -34,7 +39,7 @@ const Home = () => {
         <div>
           <h1 style={{ marginTop: 0 }}>Planning Poker</h1>
           <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut efficitur odio tellus, a venenatis orci ultricies ut. Vivamus pellentesque lectus libero, non porttitor nulla vestibulum ac.</p>
-          <button>Create Room</button>
+          <Button>Create Room</Button>
         </div>
         <div>
           <Image src={HomeTableImg} />

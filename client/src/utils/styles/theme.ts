@@ -27,7 +27,7 @@ const theme: DefaultTheme  = {
     pokerBackground: "#37464d"
   },
   fonts: {
-    family: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
+    family: '"Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif',
     size: '1.8rem'
   }
 };
