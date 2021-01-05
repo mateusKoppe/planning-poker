@@ -4,6 +4,7 @@ declare module 'styled-components' {
   interface DefaultTheme {
     colors: {
       main: string,
+      text: string,
       pokerGreen: string,
       pokerGreenDark: string,
       pokerBorderDark: string,
@@ -20,6 +21,7 @@ declare module 'styled-components' {
 const theme: DefaultTheme  = {
   colors: {
     main: "#17A65A",
+    text: "#333",
     pokerGreen: "#009345",
     pokerGreenDark: "#007538",
     pokerBorderDark: "#9d6027",

@@ -1,20 +1,15 @@
 import React from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
-import Ui from "components/Ui/index";
+import { Button } from "components/Ui";
 
 import HomeTableImg from "assets/images/home-table.png";
 
-const { Button } = Ui;
-
-
 const Wrapper = styled.div`
-  min-height: 100vh;
-  background-color: ${({ theme }) => theme.colors.main};
-  color: white;
   display: flex;
   padding: 2rem;
-  display: flex;
+  min-height: 100vh;
   align-items: center;
   justify-content: center;
 `;
@@ -38,8 +33,13 @@ const Home = () => {
       <Content>
         <div>
           <h1 style={{ marginTop: 0 }}>Planning Poker</h1>
-          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut efficitur odio tellus, a venenatis orci ultricies ut. Vivamus pellentesque lectus libero, non porttitor nulla vestibulum ac.</p>
-          <Button>Create Room</Button>
+          <p>
+            Estimate your tasks using poker <br />
+            without influencing others.
+          </p>
+          <Link to="/create-game">
+            <Button>Create Room</Button>
+          </Link>
         </div>
         <div>
           <Image src={HomeTableImg} />

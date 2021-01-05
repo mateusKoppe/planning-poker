@@ -1,7 +1,7 @@
-import Button from "./Button";
+import _Button from "./Button";
+import _Input from "./Input";
+import _Select from "./Select";
 
-const Ui = {
-  Button
-};
-
-export default Ui;
+export const Button = _Button
+export const Input = _Input
+export const Select = _Select
