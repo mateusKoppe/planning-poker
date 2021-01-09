@@ -4,6 +4,7 @@ import styled from "styled-components";
 
 import { Button, Input, Select } from "components/Ui";
 import { createGame } from "store/reducers/game";
+import { useHistory } from "react-router-dom";
 
 const Wrapper = styled.div`
   display: flex;
@@ -21,6 +22,7 @@ const Content = styled.div`
 
 const CreateGame = () => {
   const dispatch = useDispatch()
+  const history = useHistory()
 
   const [game, setGame] = useState({
     name: '',
@@ -38,6 +40,7 @@ const CreateGame = () => {
     e.preventDefault()
 
     dispatch(createGame(game))
+    history.push("/game/123")
   }
 
   return (

@@ -11,6 +11,7 @@ const Content = styled.div`
   padding: 2em;
   background-color: ${({ theme }) => theme.colors.pokerGreen};
   border: .7em solid ${({ theme }) => theme.colors.pokerBorderLight};
+  text-align: center;
 `
 
 type PokerTableProps = {
