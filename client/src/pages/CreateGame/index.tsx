@@ -1,10 +1,14 @@
-import React, { FormEvent, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
 import { Button, Input, Select } from "components/Ui";
-import { createGame } from "store/reducers/game";
+// import { createGame } from "store/reducers/game";
+
 import { useHistory } from "react-router-dom";
+import { createGame } from "store/actions/game";
+import { createGame as createGameAction } from "store/reducers/game";
+import socket from "utils/websocket";
 
 const Wrapper = styled.div`
   display: flex;
@@ -21,27 +25,37 @@ const Content = styled.div`
 `;
 
 const CreateGame = () => {
-  const dispatch = useDispatch()
-  const history = useHistory()
+  const dispatch = useDispatch();
+  const history = useHistory();
+
+  useEffect(() => {
+    socket.on(
+      "game created",
+      (data: { name: string; type: number; code: string }) => {
+        dispatch(createGameAction(data));
+        history.push("/game/123");
+      }
+    );
+  }, [dispatch, history]);
 
   const [game, setGame] = useState({
-    name: '',
-    style: 1
-  })
+    name: "",
+    type: 1,
+  });
 
-  const handleInputChange = (e: FormEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: FormEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setGame({
       ...game,
-      [e.currentTarget.name]: e.currentTarget.value
-    })
-  }
+      [e.currentTarget.name]: e.currentTarget.value,
+    });
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    dispatch(createGame(game))
-    history.push("/game/123")
-  }
+    e.preventDefault();
+    createGame(game);
+  };
 
   return (
     <Wrapper>
@@ -58,19 +72,20 @@ const CreateGame = () => {
             required
           />
           <Select
-            value={game.style}
+            value={game.type}
             onChange={handleInputChange}
-            name="style"
+            name="type"
             block
             required
           >
-            <option value={1}>Fibonacci (0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?)</option>
+            <option value={1}>
+              Fibonacci (0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, ?)
+            </option>
             <option value={2}>Power of 2 (0, 1, 2, 4, 8, 16, 32, 64, ?)</option>
           </Select>
           <Button block>Create Room</Button>
         </form>
-        <div>
-        </div>
+        <div></div>
       </Content>
     </Wrapper>
   );
