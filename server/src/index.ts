@@ -1,5 +1,5 @@
 import { Server, Socket } from "socket.io";
-import { generateGameCode } from "./games";
+import { createGame } from "./games";
 
 const PORT = Number(process.env.PORT ?? 8080);
 
@@ -13,10 +13,7 @@ io.on("connection", (socket: Socket) => {
   console.log("a user connected");
 
   socket.on("create game", (data: { name: string; type: number }) => {
-    socket.emit('game created', {
-      ...data,
-      code: generateGameCode()
-    })
+    socket.emit('game created', createGame(data))
   });
 });
 

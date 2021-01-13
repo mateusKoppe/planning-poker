@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
 import { Button, Input, Select } from "components/Ui";
-// import { createGame } from "store/reducers/game";
 
 import { useHistory } from "react-router-dom";
 import { createGame } from "store/actions/game";
@@ -33,7 +32,7 @@ const CreateGame = () => {
       "game created",
       (data: { name: string; type: number; code: string }) => {
         dispatch(createGameAction(data));
-        history.push("/game/123");
+        history.push(`/game/${data.code}`);
       }
     );
   }, [dispatch, history]);
