@@ -1,14 +1,10 @@
-import React, { FormEvent, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import React, { FormEvent, useState } from "react";
 import styled from "styled-components";
 
 import { Button, Input, Select } from "components/Ui";
-// import { createGame } from "store/reducers/game";
 
 import { useHistory } from "react-router-dom";
 import { createGame } from "store/actions/game";
-import { createGame as createGameAction } from "store/reducers/game";
-import socket from "utils/websocket";
 
 const Wrapper = styled.div`
   display: flex;
@@ -25,18 +21,7 @@ const Content = styled.div`
 `;
 
 const CreateGame = () => {
-  const dispatch = useDispatch();
   const history = useHistory();
-
-  useEffect(() => {
-    socket.on(
-      "game created",
-      (data: { name: string; type: number; code: string }) => {
-        dispatch(createGameAction(data));
-        history.push("/game/123");
-      }
-    );
-  }, [dispatch, history]);
 
   const [game, setGame] = useState({
     name: "",
@@ -52,9 +37,14 @@ const CreateGame = () => {
     });
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createGame(game);
+    try {
+      const createdGame = await createGame(game);
+      history.push(`/game/${createdGame.code}`);
+    } catch (error) {
+      alert("Error to create new game")
+    }
   };
 
   return (
