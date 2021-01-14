@@ -1,9 +1,10 @@
-import React from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import { RootState } from "store/reducers";
+
 import PokerTable from "components/PokerTable";
 import Card from "components/Card";
+import { game, findgame } from "store/actions/game";
 
 const Wrapper = styled.div`
   display: grid;
@@ -17,7 +18,7 @@ const Header = styled.header``;
 
 const RoomName = styled.h2`
   font-size: 3.5rem;
-  margin: .1em 0;
+  margin: 0.1em 0;
 `;
 
 const Table = styled.div`
@@ -35,20 +36,47 @@ const Hand = styled.div`
 `;
 
 const Game = () => {
+  const { gameId }: { gameId: string } = useParams();
   const hand = [0, 1, 2, 3, 5, 8, 13, 18, 21];
 
-  const game = useSelector((state: RootState) => state.game);
+  const [game, setGame] = useState<game | null>(null);
+  const [isGameInvalid, setIsGameInvalid] = useState(false)
+  const [isGameLoading, setIsGameLoading] = useState(false);
+  useEffect(() => {
+    const fetch = async () => {
+      setIsGameLoading(true);
+      const foundGame = await findgame(gameId);
+      setIsGameLoading(false);
+
+      if (!foundGame) {
+        setIsGameInvalid(true)
+      }
+
+      setGame(foundGame)
+    };
+    fetch();
+  }, [gameId]);
+
+  if (isGameLoading)
+    return (
+      <div>Loading!!!</div>
+    )
+
+  if (isGameInvalid)
+    return (
+      <div>Invalid game</div>
+    )
 
   return (
     <Wrapper>
       <Header>
-        <RoomName>{game.name}</RoomName>
+        <RoomName>{game?.name}</RoomName>
       </Header>
       <Table>
         <PokerTable>
-          <Card value={2}/>
-          <Card value={2}/>
-          <Card value={3}/>
+          <Card value={2} />
+          <Card value={2} />
+          <Card value={3} />
         </PokerTable>
       </Table>
       <Hand>
