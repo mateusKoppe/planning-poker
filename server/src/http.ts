@@ -11,7 +11,6 @@ app.use(cors());
 app.post("/game", (req, res) => {
   const { name, type } = req.body;
   const game = createGame({ name, type });
-  console.log(game);
   return res.json(game);
 });
 
