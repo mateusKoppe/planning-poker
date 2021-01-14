@@ -1,11 +1,13 @@
-import { Express } from "express";
+import { Server as HttpServer } from "http";
 import { Server, Socket } from "socket.io";
-import http from "http"
 
-export const run = (app: Express) => {
-  const io = new Server(new http.Server(app));
+export const run = (server: HttpServer) => {
+  const io = new Server(server, { cors: { origin: "*" } });
 
   io.on("connection", (socket: Socket) => {
     console.log("a user connected");
+    socket.on("join game", (data) => {
+      console.log(data);
+    });
   });
-}
+};

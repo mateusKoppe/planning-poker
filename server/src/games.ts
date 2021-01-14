@@ -1,4 +1,4 @@
-const games: {[code: string]: {}} = {}
+const games: {[code: string]: {}} = {ggbde: { name: 'Acme', type: 1, code: 'ggbde' }}
 
 // TODO: Improve this function
 const generateGameCode = (): string =>

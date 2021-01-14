@@ -5,6 +5,9 @@ import { createGame, findGame } from "./games";
 
 const app = express();
 
+const PORT = Number(process.env.PORT ?? 8080);
+
+app.set('port', PORT);
 app.use(bodyParser.json());
 app.use(cors());
 
