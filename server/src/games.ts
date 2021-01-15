@@ -16,14 +16,11 @@ const games: { [code: string]: Game } = {
   ggbde: { name: "Acme", type: 1, code: "ggbde", users: [] },
 };
 
-// TODO: Improve this function
 const generateGameCode = (): string =>
-  [1, 2, 3, 4, 5]
-    .map(() => {
-      const letters = ["a", "b", "c", "d", "e", "f", "g"];
-      return letters[Math.floor(Math.random() * letters.length)];
-    })
-    .join("");
+  Math.random()
+    .toString(36)
+    .replace(/[^a-z]+/g, "")
+    .substr(0, 5);
 
 export const createGame = (data: { name: string; type: number }) => {
   const code = generateGameCode();
@@ -50,7 +47,7 @@ export const gameAdduser = (gameId: string, user: { name: string }): User => {
     id: v4(),
   };
 
-  console.log(newUser)
+  console.log(newUser);
 
   game.users = [...game.users, newUser];
   return newUser;
