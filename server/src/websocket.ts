@@ -13,32 +13,32 @@ export const run = (server: HttpServer) => {
     socket.on("join game", ({ game: { code: gameCode }, profile }) => {
       const game = findGame(gameCode);
 
-      gameAdduser(gameCode, profile);
+      const createdUser = gameAdduser(gameCode, profile);
 
       room[gameCode]?.forEach((user) =>
-        user.socket.emit("new user", { newUser: profile, game })
+        user.socket.emit("new user", { newUser: createdUser, game })
       );
       room[gameCode] = [
         ...(room[gameCode] ?? []),
-        { socket, id: profile.name },
+        { socket, id: createdUser.id },
       ];
       socket.emit("joined game", { game, profile });
     });
 
     socket.on("disconnect", () => {
       Object.keys(room).forEach((gameCode) => {
-        const game = room[gameCode]
-        const user = game.find((c) => c.socket === socket);
+        const user = room[gameCode].find((c) => c.socket === socket);
+        console.log(user, 'found user')
 
         if (user) {
           gameRemoveUser(gameCode, user);
-          room[gameCode] = game.filter((u) => u !== user);
-          game.forEach(u => {
+          room[gameCode] = room[gameCode].filter((u) => u !== user);
+          room[gameCode].forEach((u) => {
             u.socket.emit("user left", {
               userLeft: { id: user.id },
               game: findGame(gameCode),
             });
-          })
+          });
         }
       });
     });
