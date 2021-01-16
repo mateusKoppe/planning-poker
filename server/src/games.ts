@@ -3,7 +3,7 @@ import { v4 } from "uuid";
 export interface User {
   name: string;
   id: string;
-  hand?: number;
+  hand: number | null;
 }
 
 export interface Game {
@@ -11,10 +11,11 @@ export interface Game {
   name: string;
   type: number;
   users: User[];
+  revealed: boolean;
 }
 
 const games: { [code: string]: Game } = {
-  acme: { name: "Acme", type: 1, code: "acme", users: [] },
+  acme: { name: "Acme", type: 1, code: "acme", users: [], revealed: false },
 };
 
 const generateGameCode = (): string =>
@@ -29,6 +30,7 @@ export const createGame = (data: { name: string; type: number }) => {
     ...data,
     users: [],
     code,
+    revealed: false
   };
 
   games[code] = game;
@@ -46,9 +48,8 @@ export const gameAdduser = (gameId: string, user: { name: string }): User => {
   const newUser: User = {
     ...user,
     id: v4(),
+    hand: null
   };
-
-  console.log(newUser);
 
   game.users = [...game.users, newUser];
   return newUser;

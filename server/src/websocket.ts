@@ -1,13 +1,19 @@
 import { Server as HttpServer } from "http";
 import { Server, Socket } from "socket.io";
-import { findGame, gameAdduser, gameRemoveUser, userSelectCard } from "./games";
+import {
+  findGame,
+  gameAdduser,
+  gameRemoveUser,
+  userSelectCard,
+  User as GameUser,
+} from "./games";
 
 type User = { socket: Socket; id: string };
 type Room = User[];
 
 const room: { [code: string]: Room } = {};
 
-const getUserBySocket = (
+const getContextBySocket = (
   socket: Socket
 ): { room: Room | null; user: User | null; gameCode: string | null } => {
   let user = null;
@@ -65,7 +71,7 @@ export const run = (server: HttpServer) => {
     });
 
     socket.on("select card", ({ card }: { card: number }) => {
-      const { room, user, gameCode } = getUserBySocket(socket);
+      const { room, user, gameCode } = getContextBySocket(socket);
       if (!gameCode || !user?.id) return;
 
       const game = userSelectCard({ gameId: gameCode, userId: user?.id, card });
@@ -73,6 +79,35 @@ export const run = (server: HttpServer) => {
       room?.forEach((u) => {
         u.socket.emit("user played", { user: { id: user?.id }, game });
       });
+    });
+
+    socket.on("reveal cards", () => {
+      const { room, user, gameCode } = getContextBySocket(socket);
+      if (!gameCode) return;
+
+      const game = findGame(gameCode);
+
+      // TODO: Improve this please
+      game.revealed = true;
+
+      room?.forEach((u) =>
+        u.socket.emit("game revealed", { game: findGame(gameCode) })
+      );
+    });
+
+    socket.on("reset voting", () => {
+      const { room, user, gameCode } = getContextBySocket(socket);
+      if (!gameCode) return;
+
+      const game = findGame(gameCode);
+
+      // TODO: Improve this please
+      game.revealed = false;
+      game.users = game.users.map((u: GameUser) => <GameUser> ({ ...u, hand: null }));
+
+      room?.forEach((u) =>
+        u.socket.emit("game revealed", { game: findGame(gameCode) })
+      );
     });
   });
 };

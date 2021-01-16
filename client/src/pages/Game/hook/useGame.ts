@@ -46,7 +46,6 @@ const useGame = (gameId: string) => {
     socket.on(
       "new user",
       ({ newUser, game }: { newUser: { name: string }; game: Game }) => {
-        alert(`cola ai ${newUser.name}`);
         setGame(game);
       }
     );
@@ -54,10 +53,13 @@ const useGame = (gameId: string) => {
     socket.on(
       "user played",
       ({ user, game }: { user: { id: string }; game: Game }) => {
-        console.log(game)
         setGame(game);
       }
     );
+
+    socket.on("game revealed", ({ game }: { game: Game }) => {
+      setGame(game);
+    });
   }, []);
 
   const joinGame = (value: { name: string }) => {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -7,6 +7,7 @@ import Card from "components/Card";
 import JoinForm from "./components/JoinForm";
 import useGame from "./hook/useGame";
 import socket from "utils/websocket";
+import { Button } from "components/Ui";
 
 const Wrapper = styled.div`
   display: grid;
@@ -48,6 +49,14 @@ const GamePage = () => {
     socket.emit("select card", { card });
   };
 
+  const handleRevealCards = () => {
+    socket.emit("reveal cards");
+  };
+
+  const handleNewVoting = () => {
+    socket.emit("reset voting");
+  };
+
   if (isGameLoading) return <div>Loading!!!</div>;
 
   if (isGameInvalid) return <div>Invalid game</div>;
@@ -63,12 +72,19 @@ const GamePage = () => {
         <>
           <Table>
             <PokerTable>
-              {game?.users?.map((user, index) => (
+              {game?.users.map((user, index) => (
                 <div key={index} style={{ display: "inline-block" }}>
-                  <Card value={user?.hand} />
+                  {user?.hand && (
+                    <Card value={game?.revealed ? user?.hand : null} />
+                  )}
                   {user.name}
                 </div>
               ))}
+              {game?.revealed ? (
+                <Button onClick={handleNewVoting}> Reset vote</Button>
+              ) : (
+                <Button onClick={handleRevealCards}>Reveal</Button>
+              )}
             </PokerTable>
           </Table>
           <Hand>
