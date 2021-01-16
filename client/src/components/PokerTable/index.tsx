@@ -2,15 +2,16 @@ import React, { ReactNode } from "react";
 import styled from "styled-components";
 
 const Wrapper = styled.div`
-  border: .8em solid ${({ theme }) => theme.colors.pokerBorderDark};
-  border-radius: 3.75rem;
+  border: 1em solid ${({ theme }) => theme.colors.pokerBorderDark};
+  border-radius: calc(10% + 100rem);
+  width: 100%;
 `
 
 const Content = styled.div`
-  border-radius: 3rem;
-  padding: 2em;
+  border-radius: calc(10% + 100rem);
+  padding: 3em;
   background-color: ${({ theme }) => theme.colors.pokerGreen};
-  border: .7em solid ${({ theme }) => theme.colors.pokerBorderLight};
+  border: .75em solid ${({ theme }) => theme.colors.pokerBorderLight};
   text-align: center;
 `
 

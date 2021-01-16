@@ -1,47 +1,53 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import styled from "styled-components";
+import styled, { css } from "styled-components/macro";
 
-import PokerTable from "components/PokerTable";
-import Card from "components/Card";
 import JoinForm from "./components/JoinForm";
 import useGame from "./hook/useGame";
+import Hand from "./components/Hand";
+import Table from "./components/Table";
 
 const Wrapper = styled.div`
   display: grid;
-  grid-template-columns: auto;
   grid-template-rows: 10rem auto auto;
+  grid-template-columns: 100%;
   padding: 2rem;
   min-height: 100vh;
+  justify-content: center;
 `;
 
-const Header = styled.header``;
+const Header = styled.header`
+  flex-basis: 100;
+`;
 
 const RoomName = styled.h2`
   font-size: 3.5rem;
   margin: 0.1em 0;
 `;
 
-const Table = styled.div`
+const TableWrapper = styled.div`
   display: flex;
-  align-items: center;
   justify-content: center;
 `;
 
-const Hand = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  text-align: center;
-  justify-content: center;
-  align-items: center;
-`;
+const StyledTable = styled(Table)`
+  max-width: 150rem;
+  width: 100%;
+`
 
 const GamePage = () => {
   const { gameId }: { gameId: string } = useParams();
-  const hand = [0, 1, 2, 3, 5, 8, 13, 18, 21];
-  const { game, profile, joinGame, isGameLoading, isGameInvalid } = useGame(
-    gameId
-  );
+  const hand = [0, 1, 2, 3, 5, 8, 13, 18];
+  const {
+    game,
+    profile,
+    isGameLoading,
+    isGameInvalid,
+    joinGame,
+    selectCard,
+    startNewVoting,
+    revealCards,
+  } = useGame(gameId);
 
   if (isGameLoading) return <div>Loading!!!</div>;
 
@@ -54,25 +60,21 @@ const GamePage = () => {
           {game?.name} - {profile?.name}
         </RoomName>
       </Header>
-      {profile ? (
+      {profile && game ? (
         <>
-          <Table>
-            <PokerTable>
-              {game?.users?.map((user, index) => (
-                <div key={index} style={{ display: "inline-block" }}>
-                  <Card value={2} />
-                  {user.name}
-                </div>
-              ))}
-            </PokerTable>
-          </Table>
-          <Hand>
-            <div>
-              {hand.map((value) => (
-                <Card value={value} key={value} />
-              ))}
-            </div>
-          </Hand>
+          <TableWrapper>
+            <StyledTable
+              game={game}
+              onNewVoting={startNewVoting}
+              onRevealCards={revealCards}
+            />
+          </TableWrapper>
+          <Hand
+            hand={hand}
+            profile={profile}
+            onSelectCard={selectCard}
+            game={game}
+          />
         </>
       ) : (
         <JoinForm onSubmit={joinGame} />

@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import { findgame, Game } from "store/actions/game";
+
+import { Game } from "types/Game";
+import { Profile } from "types/Profile";
+
+import { findgame } from "actions/game";
 import socket from "utils/websocket";
 
 const useGame = (gameId: string) => {
-  const [game, setGame] = useState<Game | null>(null);
+  const [game, setGame] = useState<Game>();
   const [isGameInvalid, setIsGameInvalid] = useState<boolean>(false);
   const [isGameLoading, setIsGameLoading] = useState<boolean>(false);
 
@@ -22,18 +26,11 @@ const useGame = (gameId: string) => {
     fetch();
   }, [gameId]);
 
-  const [profile, setProfile] = useState<{ name: string }>();
+  const [profile, setProfile] = useState<Profile>();
   useEffect(() => {
     socket.on(
       "joined game",
-      ({
-        game,
-        profile: createdProfile,
-      }: {
-        game: Game;
-        profile: { name: string };
-      }) => {
-        console.log(game, createdProfile);
+      ({ game, profile: createdProfile }: { game: Game; profile: Profile }) => {
         setProfile(createdProfile);
         setGame(game);
       }
@@ -42,23 +39,60 @@ const useGame = (gameId: string) => {
     socket.on("user left", ({ game }: { game: Game }) => {
       setGame(game);
     });
-  }, []);
 
-  useEffect(() => {
     socket.on(
       "new user",
-      ({ newUser, game }: { newUser: { name: string }; game: Game }) => {
-        alert(`cola ai ${newUser.name}`);
+      ({
+        newUser,
+        game,
+      }: {
+        newUser: { name: string; id: string };
+        game: Game;
+      }) => {
         setGame(game);
       }
     );
+
+    socket.on(
+      "user played",
+      ({ user, game }: { user: { id: string }; game: Game }) => {
+        setGame(game);
+      }
+    );
+
+    socket.on("game revealed", ({ game }: { game: Game }) => {
+      setGame(game);
+      setProfile({ ...profile, hand: undefined } as Profile);
+    });
   }, []);
+
+  const selectCard = (card: number) => {
+    setProfile({ ...profile, hand: card } as Profile);
+    socket.emit("select card", { card });
+  };
 
   const joinGame = (value: { name: string }) => {
     socket.emit("join game", { game, profile: value });
   };
 
-  return { game, joinGame, profile, isGameLoading, isGameInvalid };
+  const revealCards = () => {
+    socket.emit("reveal cards");
+  };
+
+  const startNewVoting = () => {
+    socket.emit("reset voting");
+  };
+
+  return {
+    game,
+    joinGame,
+    profile,
+    isGameLoading,
+    isGameInvalid,
+    selectCard,
+    revealCards,
+    startNewVoting,
+  };
 };
 
 export default useGame;

@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Button, Input, Select } from "components/Ui";
 
 import { useHistory } from "react-router-dom";
-import { createGame } from "store/actions/game";
+import { createGame } from "actions/game";
 
 const Wrapper = styled.div`
   display: flex;
