@@ -4,7 +4,7 @@ export interface Game {
   name: string;
   type: number;
   code: string;
-  users: { name: string; hand: number | null }[];
+  users: { id: string, name: string; hand: number | null }[];
   revealed: boolean;
 }
 

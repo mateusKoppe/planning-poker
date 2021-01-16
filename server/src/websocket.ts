@@ -6,6 +6,7 @@ import {
   gameRemoveUser,
   userSelectCard,
   User as GameUser,
+  Game,
 } from "./games";
 
 type User = { socket: Socket; id: string };
@@ -50,7 +51,7 @@ export const run = (server: HttpServer) => {
         ...(room[gameCode] ?? []),
         { socket, id: createdUser.id },
       ];
-      socket.emit("joined game", { game, profile });
+      socket.emit("joined game", { game, profile: createdUser });
     });
 
     socket.on("disconnect", () => {
@@ -74,7 +75,10 @@ export const run = (server: HttpServer) => {
       const { room, user, gameCode } = getContextBySocket(socket);
       if (!gameCode || !user?.id) return;
 
-      const game = userSelectCard({ gameId: gameCode, userId: user?.id, card });
+      let game: Game | undefined = findGame(gameCode);
+      if (game.revealed) return
+
+      game = userSelectCard({ gameId: gameCode, userId: user?.id, card });
 
       room?.forEach((u) => {
         u.socket.emit("user played", { user: { id: user?.id }, game });
@@ -103,7 +107,9 @@ export const run = (server: HttpServer) => {
 
       // TODO: Improve this please
       game.revealed = false;
-      game.users = game.users.map((u: GameUser) => <GameUser> ({ ...u, hand: null }));
+      game.users = game.users.map(
+        (u: GameUser) => <GameUser>{ ...u, hand: null }
+      );
 
       room?.forEach((u) =>
         u.socket.emit("game revealed", { game: findGame(gameCode) })
