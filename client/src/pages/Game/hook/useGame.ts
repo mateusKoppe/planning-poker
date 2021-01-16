@@ -42,13 +42,19 @@ const useGame = (gameId: string) => {
     socket.on("user left", ({ game }: { game: Game }) => {
       setGame(game);
     });
-  }, []);
 
-  useEffect(() => {
     socket.on(
       "new user",
       ({ newUser, game }: { newUser: { name: string }; game: Game }) => {
         alert(`cola ai ${newUser.name}`);
+        setGame(game);
+      }
+    );
+
+    socket.on(
+      "user played",
+      ({ user, game }: { user: { id: string }; game: Game }) => {
+        console.log(game)
         setGame(game);
       }
     );

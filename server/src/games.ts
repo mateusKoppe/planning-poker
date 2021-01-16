@@ -3,6 +3,7 @@ import { v4 } from "uuid";
 export interface User {
   name: string;
   id: string;
+  hand?: number;
 }
 
 export interface Game {
@@ -13,7 +14,7 @@ export interface Game {
 }
 
 const games: { [code: string]: Game } = {
-  ggbde: { name: "Acme", type: 1, code: "ggbde", users: [] },
+  acme: { name: "Acme", type: 1, code: "acme", users: [] },
 };
 
 const generateGameCode = (): string =>
@@ -59,3 +60,22 @@ export const gameRemoveUser = (gameId: string, user: { id: string }) => {
 
   game.users = game.users.filter((u) => u.id !== user.id);
 };
+
+export const userSelectCard = ({
+  gameId,
+  userId,
+  card,
+}: {
+  gameId: string;
+  userId: string;
+  card: number;
+}) => {
+  const game = findGame(gameId)
+  const user = game.users.find(u => u.id === userId)
+  if (!user) return
+
+  user.hand = card
+
+  return game
+};
+

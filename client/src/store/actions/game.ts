@@ -4,7 +4,7 @@ export interface Game {
   name: string;
   type: number;
   code?: string
-  users?: {name: string}[]
+  users?: {name: string, hand: number}[]
 }
 
 export class GameNotFound extends Error {

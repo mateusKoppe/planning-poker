@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
@@ -6,6 +6,7 @@ import PokerTable from "components/PokerTable";
 import Card from "components/Card";
 import JoinForm from "./components/JoinForm";
 import useGame from "./hook/useGame";
+import socket from "utils/websocket";
 
 const Wrapper = styled.div`
   display: grid;
@@ -43,6 +44,10 @@ const GamePage = () => {
     gameId
   );
 
+  const handleSelectCard = (card: number) => {
+    socket.emit("select card", { card });
+  };
+
   if (isGameLoading) return <div>Loading!!!</div>;
 
   if (isGameInvalid) return <div>Invalid game</div>;
@@ -60,7 +65,7 @@ const GamePage = () => {
             <PokerTable>
               {game?.users?.map((user, index) => (
                 <div key={index} style={{ display: "inline-block" }}>
-                  <Card value={2} />
+                  <Card value={user?.hand} />
                   {user.name}
                 </div>
               ))}
@@ -69,7 +74,11 @@ const GamePage = () => {
           <Hand>
             <div>
               {hand.map((value) => (
-                <Card value={value} key={value} />
+                <Card
+                  onClick={() => handleSelectCard(value)}
+                  value={value}
+                  key={value}
+                />
               ))}
             </div>
           </Hand>
