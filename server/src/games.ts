@@ -1,5 +1,15 @@
 import { v4 } from "uuid";
 
+enum CardsGameType {
+  fibonnaci = 1,
+  powerOf2 = 2,
+}
+
+const decks: {[code: number]: Number[]} = {
+  [CardsGameType.fibonnaci]: [0, 1, 2, 3, 5, 6, 13, 21, 34, 55, 89],
+  [CardsGameType.powerOf2]: [0, 1, 2, 4, 8, 16, 32, 64],
+};
+
 export interface User {
   name: string;
   id: string;
@@ -11,11 +21,19 @@ export interface Game {
   name: string;
   type: number;
   users: User[];
+  cards: Number[];
   revealed: boolean;
 }
 
 const games: { [code: string]: Game } = {
-  acme: { name: "Acme", type: 1, code: "acme", users: [], revealed: false },
+  acme: {
+    name: "Acme",
+    type: 1,
+    code: "acme",
+    users: [],
+    revealed: false,
+    cards: decks[CardsGameType.fibonnaci],
+  },
 };
 
 const generateGameCode = (): string =>
@@ -24,14 +42,17 @@ const generateGameCode = (): string =>
     .replace(/[^a-z]+/g, "")
     .substr(0, 5);
 
-export const createGame = (data: { name: string; type: number }) => {
+export const createGame = (data: { name: string; type: CardsGameType }) => {
   const code = generateGameCode();
   const game: Game = {
     ...data,
     users: [],
     code,
-    revealed: false
+    revealed: false,
+    cards: decks[data.type],
   };
+
+  console.log(game)
 
   games[code] = game;
 
@@ -48,7 +69,7 @@ export const gameAdduser = (gameId: string, user: { name: string }): User => {
   const newUser: User = {
     ...user,
     id: v4(),
-    hand: null
+    hand: null,
   };
 
   game.users = [...game.users, newUser];
@@ -71,12 +92,11 @@ export const userSelectCard = ({
   userId: string;
   card: number;
 }) => {
-  const game = findGame(gameId)
-  const user = game.users.find(u => u.id === userId)
-  if (!user) return
+  const game = findGame(gameId);
+  const user = game.users.find((u) => u.id === userId);
+  if (!user) return;
 
-  user.hand = card
+  user.hand = card;
 
-  return game
+  return game;
 };
-
