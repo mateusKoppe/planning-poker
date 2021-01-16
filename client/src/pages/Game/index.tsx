@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import PokerTable from "components/PokerTable";
 import Card from "components/Card";
-import { game, findgame } from "store/actions/game";
+import JoinForm from "./components/JoinForm";
+import useGame from "./hook/useGame";
 
 const Wrapper = styled.div`
   display: grid;
@@ -35,59 +36,49 @@ const Hand = styled.div`
   align-items: center;
 `;
 
-const Game = () => {
+const GamePage = () => {
   const { gameId }: { gameId: string } = useParams();
   const hand = [0, 1, 2, 3, 5, 8, 13, 18, 21];
+  const { game, profile, joinGame, isGameLoading, isGameInvalid } = useGame(
+    gameId
+  );
 
-  const [game, setGame] = useState<game | null>(null);
-  const [isGameInvalid, setIsGameInvalid] = useState(false)
-  const [isGameLoading, setIsGameLoading] = useState(false);
-  useEffect(() => {
-    const fetch = async () => {
-      setIsGameLoading(true);
-      const foundGame = await findgame(gameId);
-      setIsGameLoading(false);
+  if (isGameLoading) return <div>Loading!!!</div>;
 
-      if (!foundGame) {
-        setIsGameInvalid(true)
-      }
-
-      setGame(foundGame)
-    };
-    fetch();
-  }, [gameId]);
-
-  if (isGameLoading)
-    return (
-      <div>Loading!!!</div>
-    )
-
-  if (isGameInvalid)
-    return (
-      <div>Invalid game</div>
-    )
+  if (isGameInvalid) return <div>Invalid game</div>;
 
   return (
     <Wrapper>
       <Header>
-        <RoomName>{game?.name}</RoomName>
+        <RoomName>
+          {game?.name} - {profile?.name}
+        </RoomName>
       </Header>
-      <Table>
-        <PokerTable>
-          <Card value={2} />
-          <Card value={2} />
-          <Card value={3} />
-        </PokerTable>
-      </Table>
-      <Hand>
-        <div>
-          {hand.map((value) => (
-            <Card value={value} key={value} />
-          ))}
-        </div>
-      </Hand>
+      {profile ? (
+        <>
+          <Table>
+            <PokerTable>
+              {game?.users?.map((user, index) => (
+                <div key={index} style={{ display: "inline-block" }}>
+                  <Card value={2} />
+                  {user.name}
+                </div>
+              ))}
+            </PokerTable>
+          </Table>
+          <Hand>
+            <div>
+              {hand.map((value) => (
+                <Card value={value} key={value} />
+              ))}
+            </div>
+          </Hand>
+        </>
+      ) : (
+        <JoinForm onSubmit={joinGame} />
+      )}
     </Wrapper>
   );
 };
 
-export default Game;
+export default GamePage;

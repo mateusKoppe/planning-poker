@@ -1,8 +1,10 @@
 import api from "utils/api";
 
-export interface game {
+export interface Game {
   name: string;
   type: number;
+  code?: string
+  users?: {name: string}[]
 }
 
 export class GameNotFound extends Error {
@@ -14,7 +16,7 @@ export class GameNotFound extends Error {
   }
 }
 
-export const createGame = async (game: game) => {
+export const createGame = async (game: Game) => {
   const response = await api.post("/game", game);
   return response.data;
 };
