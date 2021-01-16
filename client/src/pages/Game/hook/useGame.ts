@@ -9,7 +9,7 @@ import socket from "utils/websocket";
 const useGame = (gameId: string) => {
   const [game, setGame] = useState<Game>();
   const [isGameInvalid, setIsGameInvalid] = useState<boolean>(false);
-  const [isGameLoading, setIsGameLoading] = useState<boolean>(false);
+  const [isGameLoading, setIsGameLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetch = async () => {
