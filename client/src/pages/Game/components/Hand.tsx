@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from "react";
 
-import { Profile } from "../hook/useGame";
+import { Game } from "types/Game";
+import { Profile } from "types/Profile";
 
-import { Game } from "store/actions/game";
 import styled from "styled-components";
 import Card from "components/Card";
 

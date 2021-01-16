@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { findgame, Game } from "store/actions/game";
-import socket from "utils/websocket";
 
-export interface Profile {
-  name: string;
-  id: string;
-  hand?: number;
-}
+import { Game } from "types/Game";
+import { Profile } from "types/Profile";
+
+import { findgame } from "actions/game";
+import socket from "utils/websocket";
 
 const useGame = (gameId: string) => {
   const [game, setGame] = useState<Game>();

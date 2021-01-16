@@ -2,7 +2,7 @@ import Card from "components/Card";
 import PokerTable from "components/PokerTable";
 import { Button } from "components/Ui";
 import React, { FunctionComponent, HTMLAttributes } from "react";
-import { Game } from "store/actions/game";
+import { Game } from "types/Game";
 import styled from "styled-components/macro";
 
 const Wrapper = styled.div`
