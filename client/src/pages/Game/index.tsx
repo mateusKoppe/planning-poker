@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import styled, { css } from "styled-components/macro";
+import styled from "styled-components/macro";
 
 import JoinForm from "./components/JoinForm";
 import useGame from "./hook/useGame";
@@ -33,7 +33,7 @@ const TableWrapper = styled.div`
 const StyledTable = styled(Table)`
   max-width: 150rem;
   width: 100%;
-`
+`;
 
 const GamePage = () => {
   const { gameId }: { gameId: string } = useParams();
@@ -51,7 +51,11 @@ const GamePage = () => {
 
   if (isGameLoading) return <div>Loading!!!</div>;
 
-  if (isGameInvalid) return <div>Invalid game</div>;
+  if (!game || isGameInvalid) return <div>Invalid game</div>;
+
+  if (!profile) {
+    return <JoinForm game={game} onSubmit={joinGame} />;
+  }
 
   return (
     <Wrapper>
@@ -60,25 +64,19 @@ const GamePage = () => {
           {game?.name} - {profile?.name}
         </RoomName>
       </Header>
-      {profile && game ? (
-        <>
-          <TableWrapper>
-            <StyledTable
-              game={game}
-              onNewVoting={startNewVoting}
-              onRevealCards={revealCards}
-            />
-          </TableWrapper>
-          <Hand
-            hand={hand}
-            profile={profile}
-            onSelectCard={selectCard}
-            game={game}
-          />
-        </>
-      ) : (
-        <JoinForm onSubmit={joinGame} />
-      )}
+      <TableWrapper>
+        <StyledTable
+          game={game}
+          onNewVoting={startNewVoting}
+          onRevealCards={revealCards}
+        />
+      </TableWrapper>
+      <Hand
+        hand={hand}
+        profile={profile}
+        onSelectCard={selectCard}
+        game={game}
+      />
     </Wrapper>
   );
 };
