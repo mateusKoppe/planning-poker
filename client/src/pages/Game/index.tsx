@@ -37,7 +37,7 @@ const StyledTable = styled(Table)`
 
 const GamePage = () => {
   const { gameId }: { gameId: string } = useParams();
-  const hand = [0, 1, 2, 3, 5, 8, 13, 18];
+
   const {
     game,
     profile,
@@ -72,7 +72,6 @@ const GamePage = () => {
         />
       </TableWrapper>
       <Hand
-        hand={hand}
         profile={profile}
         onSelectCard={selectCard}
         game={game}

@@ -7,12 +7,12 @@ const app = express();
 
 const PORT = Number(process.env.PORT ?? 8080);
 
-app.set('port', PORT);
+app.set("port", PORT);
 app.use(bodyParser.json());
 app.use(cors());
 
 app.post("/game", (req, res) => {
-  const { name, type } = req.body;
+  const { name, type }: { name: string; type: number } = req.body;
   const game = createGame({ name, type });
   return res.json(game);
 });

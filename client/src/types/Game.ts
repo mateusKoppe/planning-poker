@@ -1,4 +1,5 @@
 export interface Game {
+  cards: number[];
   name: string;
   type: number;
   code: string;

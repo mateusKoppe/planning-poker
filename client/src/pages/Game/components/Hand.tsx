@@ -15,21 +15,19 @@ const Wrapper = styled.div`
 `;
 
 interface HandProps {
-  hand: number[];
   game: Game;
   onSelectCard: Function;
   profile: Profile;
 }
 
 const Hand: FunctionComponent<HandProps> = ({
-  hand,
   game,
   onSelectCard,
   profile,
 }) => (
   <Wrapper>
     <div>
-      {hand.map((value) => (
+      {game.cards.map((value) => (
         <Card
           onClick={() => !game.revealed && onSelectCard(value)}
           selected={profile.hand === value}
