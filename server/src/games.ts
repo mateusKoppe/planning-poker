@@ -6,7 +6,7 @@ enum CardsGameType {
 }
 
 const decks: {[code: number]: Number[]} = {
-  [CardsGameType.fibonnaci]: [0, 1, 2, 3, 5, 6, 13, 21, 34, 55, 89],
+  [CardsGameType.fibonnaci]: [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89],
   [CardsGameType.powerOf2]: [0, 1, 2, 4, 8, 16, 32, 64],
 };
 
