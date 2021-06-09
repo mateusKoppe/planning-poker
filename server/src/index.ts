@@ -13,7 +13,7 @@ const run = (port: Number, callback: Function = () => {}) => {
 };
 
 if (process.env.NODE_ENV === "development") {
-  const PORT = Number(process.env.PORT ?? 8080);
+  const PORT = Number(process.env.REACT_APP_API_PORT ?? 8080);
   run(PORT)
 }
 

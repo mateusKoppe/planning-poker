@@ -13,54 +13,36 @@ This app provides a simple, real-time and easy-to-use interface to help your tea
 - [Socket.io](https://socket.io)
 
 ## Getting Started
+To make the app run is a very straightforward process:
 
-### Server
-Access the `server` folder and install the dependencies with your package manager:
 ```bash
-cd server
 yarn
-```
-
-Compile the TypeScript files and run the server:
-```bash
 yarn build
 yarn start
 ```
 
-It will spin-up a server on the port `8080`, you can change this with the `PORT` environment variable.
+It will spin-up a server on the port `8080`.
 
-### Client
-Access the `client` folder and install the dependencies with your package manager:
-```bash
-cd client
-yarn
+You can change this with the `REACT_APP_API_PORT` environment variable:
 ```
-
-If you are going to use the server in a different address than `localhost:8080` you need to configure that in the `client/src/config.ts` file.
-
-Start the client server
-```bash
-yarn start
+REACT_APP_API_PORT=80 yarn start
 ```
 
 ## Development
-If you want to make changes in the project first install the dependencies following the `Getting Started` section.
-
-The client does not need any additional configuration for development.
-
-### Server:
-To make changes in the server you will probably want hot-reload, for that just run:
+To make changes in the repository and use the dev environment:
 ```bash
-cd server
+yarn
 yarn dev
 ```
 
-### Building
-To deploy the application you can follow the `Getting Started` section with the only extra-step of building the frontend, for that just run:
-
+## Deploying
+When you deploy the application you will probably want to change the `REACT_APP_API_PORT` and `REACT_APP_API_DOMAIN` environment variables:
 ```bash
-cd client
-yarn build
+REACT_APP_API_PORT=80 REACT_APP_API_DOMAIN=myplanningpai.com yarn build
+
+# You don't need the domain to start
+# Don't forget to use the same port when you start the API
+REACT_APP_API_PORT=80 yarn start
 ```
 
 ## License
