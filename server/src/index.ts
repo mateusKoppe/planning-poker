@@ -1,8 +1,20 @@
-import http from "./http";
 import { Server } from "http";
-import { run as runWebsocket } from "./websocket"
+import app from "./http";
+import { run as runWebsocket } from "./websocket";
 
-const server: Server = http.listen(http.get('port'),
-  () => console.log(`Listeing on port: ${http.get('port')}`));
+const run = (port: Number, callback: Function = () => {}) => {
+  app.set("port", port);
+  callback(app);
+  const server: Server = app.listen(port, () =>
+    console.log(`Listeing on port: ${port}`)
+  );
 
-runWebsocket(server)
+  runWebsocket(server);
+};
+
+if (process.env.NODE_ENV === "development") {
+  const PORT = Number(process.env.PORT ?? 8080);
+  run(PORT)
+}
+
+export default run;

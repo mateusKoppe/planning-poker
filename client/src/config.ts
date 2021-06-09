@@ -1,7 +1,7 @@
-const API_ADDRESS = "192.168.0.103:8080"
+const API_ADDRESS = "localhost:8080"
 
 const config = {
-  API_URL: `http://${API_ADDRESS}/`,
+  API_URL: `http://${API_ADDRESS}/api`,
   WS_URL: `ws://${API_ADDRESS}`
 }
 

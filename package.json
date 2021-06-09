@@ -1,0 +1,18 @@
+{
+  "name": "planning-poker",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/mateusKoppe/planning-poker",
+  "author": "Mateus Koppe <mateus.koppe@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "concurrently \"yarn --cwd client build\" \"yarn --cwd server build\"",
+    "start": "node index.js",
+    "dev": "concurrently \"yarn --cwd client start\" \"yarn --cwd server dev\""
+  },
+  "workspaces": ["client", "server"],
+  "dependencies": {
+    "concurrently": "^6.2.0"
+  }
+}
