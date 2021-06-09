@@ -62,7 +62,7 @@ const useGame = (gameId: string) => {
 
     socket.on("game revealed", ({ game }: { game: Game }) => {
       setGame(game);
-      setProfile({ ...profile, hand: undefined } as Profile);
+      setProfile(profile => ({ ...profile, hand: undefined }) as Profile);
     });
   }, []);
 
