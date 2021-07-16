@@ -1,20 +1,15 @@
 import { v4 } from "uuid";
+import {
+  append,
+  assoc,
+  assocPath,
+  filter,
+  findIndex,
+  merge,
+  propEq,
+} from "ramda";
 
-enum CardsGameType {
-  fibonnaci = 1,
-  powerOf2 = 2,
-}
-
-const decks: {[code: number]: Number[]} = {
-  [CardsGameType.fibonnaci]: [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89],
-  [CardsGameType.powerOf2]: [0, 1, 2, 4, 8, 16, 32, 64],
-};
-
-export interface User {
-  name: string;
-  id: string;
-  hand: number | null;
-}
+export type GamesHash = { [code: string]: Game };
 
 export interface Game {
   code?: string;
@@ -25,15 +20,20 @@ export interface Game {
   revealed: boolean;
 }
 
-const games: { [code: string]: Game } = {
-  acme: {
-    name: "Acme",
-    type: 1,
-    code: "acme",
-    users: [],
-    revealed: false,
-    cards: decks[CardsGameType.fibonnaci],
-  },
+export interface User {
+  name: string;
+  id: string;
+  hand: number | null;
+}
+
+export enum CardsGameType {
+  fibonnaci = 1,
+  powerOf2 = 2,
+}
+
+const decks: { [code: number]: Number[] } = {
+  [CardsGameType.fibonnaci]: [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89],
+  [CardsGameType.powerOf2]: [0, 1, 2, 4, 8, 16, 32, 64],
 };
 
 const generateGameCode = (): string =>
@@ -42,7 +42,10 @@ const generateGameCode = (): string =>
     .replace(/[^a-z]+/g, "")
     .substr(0, 5);
 
-export const createGame = (data: { name: string; type: CardsGameType }) => {
+export const createGame = (data: {
+  name: string;
+  type: CardsGameType;
+}): Game => {
   const code = generateGameCode();
   const game: Game = {
     ...data,
@@ -52,51 +55,45 @@ export const createGame = (data: { name: string; type: CardsGameType }) => {
     cards: decks[data.type],
   };
 
-  console.log(game)
-
-  games[code] = game;
-
   return game;
 };
 
-export const findGame = (name: string): Game => {
+export const findGame = (games: GamesHash, name: string): Game => {
   return games[name];
 };
 
-export const gameAdduser = (gameId: string, user: { name: string }): User => {
-  const game = findGame(gameId);
-
-  const newUser: User = {
-    ...user,
+export const gameAdduser = (
+  game: Game,
+  user: { name: string }
+): { game: Game; user: User } => {
+  const newUser: User = merge(user, {
     id: v4(),
     hand: null,
-  };
+  });
 
-  game.users = [...game.users, newUser];
-  return newUser;
+  const users = append(newUser, game.users);
+  const updatedGame = assoc("users", users, game);
+
+  return { game: updatedGame, user: newUser };
 };
 
-export const gameRemoveUser = (gameId: string, user: { id: string }) => {
-  const game = findGame(gameId);
-  if (!game) return;
-
-  game.users = game.users.filter((u) => u.id !== user.id);
+export const gameRemoveUser = (game: Game, user: { id: string }): Game => {
+  const users = filter(propEq("id", user.id), game.users);
+  const updatedGame = assoc("users", users, game);
+  return updatedGame;
 };
 
 export const userSelectCard = ({
-  gameId,
+  game,
   userId,
   card,
 }: {
-  gameId: string;
+  game: Game;
   userId: string;
   card: number;
-}) => {
-  const game = findGame(gameId);
-  const user = game.users.find((u) => u.id === userId);
-  if (!user) return;
+}): Game => {
+  const userI = findIndex(propEq("id", userId), game.users);
+  if (userI == -1) return game;
 
-  user.hand = card;
-
-  return game;
+  return assocPath(["users", userI, "hand"], card, game);
 };
