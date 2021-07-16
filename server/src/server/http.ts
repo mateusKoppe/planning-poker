@@ -1,18 +1,19 @@
+import { assoc } from "ramda";
 import express, { Express } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-import { createGame, findGame, GamesHash } from "./games";
-import { Atom } from "./utils/atom";
+import { createGame, findGame, GamesHash } from "../services/games";
+import { Atom } from "../utils/atom";
 
 const run = ({
   gamesAtom,
   port,
-  callback,
+  callback = () => {},
 }: {
   gamesAtom: Atom<GamesHash>;
   port: Number;
-  callback: (app: Express) => void;
+  callback?: (app: Express) => void;
 }) => {
   const app = express();
   const [getGames, setGames] = gamesAtom;
@@ -23,7 +24,7 @@ const run = ({
   app.post("/api/game", (req, res) => {
     const { name, type }: { name: string; type: number } = req.body;
     const game = createGame({ name, type });
-    setGames({ ...getGames(), game });
+    setGames(assoc(game.code, game, getGames()));
     return res.json(game);
   });
 

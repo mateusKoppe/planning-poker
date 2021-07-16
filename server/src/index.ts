@@ -1,14 +1,14 @@
-import { Server } from "http";
-import runServer from "./http";
+import { Express } from "express";
+import runServer from "./server/http";
 import atom from "./utils/atom";
-import { GamesHash } from "./games";
-import { run as runWebsocket } from "./websocket";
+import { GamesHash } from "./services/games";
+import { run as runWebsocket } from "./server/websocket";
 
 const gamesAtom = atom<GamesHash>({});
 
-const run = (port: Number, callback: Function = () => {}) => {
-  const server = runServer({ gamesAtom, port });
-  runWebsocket(server);
+const run = (port: Number, callback?: (app: Express) => void) => {
+  const server = runServer({ gamesAtom, port, callback });
+  runWebsocket({server, gamesAtom});
 };
 
 if (process.env.NODE_ENV === "development") {
