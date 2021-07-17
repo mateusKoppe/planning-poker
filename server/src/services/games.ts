@@ -1,6 +1,15 @@
-import { assocPath, dissocPath, merge } from "ramda";
+import {
+  append,
+  assoc,
+  find,
+  findIndex,
+  merge,
+  propEq,
+  reject,
+  update,
+} from "ramda";
 
-import { User, UsersHash } from "./user";
+import { User } from "./user";
 
 export type GamesHash = { [code: string]: Game };
 
@@ -8,7 +17,7 @@ export interface Game {
   code: string;
   name: string;
   type: number;
-  users: UsersHash;
+  users: User[];
   cards: Number[];
   revealed: boolean;
 }
@@ -31,22 +40,24 @@ const generateGameCode = (): string =>
 
 export const createGame = (data: { name: string; type: CardsGameType }): Game =>
   merge(data, {
-    users: {},
+    users: [],
     code: generateGameCode(),
     revealed: false,
     cards: decks[data.type],
   });
 
-export const findGame = (games: GamesHash, name: string): Game => games[name];
+export const findGame = (games: GamesHash, code: string): Game => games[code];
 
 export const gameAddUser = (game: Game, user: User): Game =>
-  assocPath(["users", user.id], user, game);
+  assoc("users", append(user, game.users), game);
 
 export const gameRemoveUser = (game: Game, user: User): Game =>
-  dissocPath(["users", user.id], game);
+  assoc("users", reject(propEq("id", user.id), game.users), game);
 
-export const gameFindUser = (game: Game, userId: string): User =>
-  game.users[userId];
+export const gameFindUser = (game: Game, userId: string): User | null =>
+  find(propEq("id", userId), game.users) || null;
 
-export const userSelectCard = (game: Game, user: User, card: number): Game =>
-  assocPath(["users", user.id, "hand"], card, game);
+export const gameUpdateUser = (game: Game, user: User): Game => {
+  const userIndex = findIndex(propEq("id", user.id), game.users);
+  return assoc("users", update(userIndex, user, game.users), game);
+};

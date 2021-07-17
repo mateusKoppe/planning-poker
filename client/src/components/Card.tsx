@@ -71,7 +71,7 @@ const Card: React.FunctionComponent<CardProps> = ({
     <Wrapper
       {...props}
       unknown={unknown}
-      picked={value !== null}
+      picked={value !== undefined}
       readOnly={readOnly}
       selected={selected}
     >

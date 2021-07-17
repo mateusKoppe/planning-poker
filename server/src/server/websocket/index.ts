@@ -1,21 +1,29 @@
 import { Server as HttpServer } from "http";
-import { assoc } from "ramda";
+import { assoc, chain, dissoc, ifElse, map, pipe, propEq } from "ramda";
 import { Server, Socket } from "socket.io";
+
+import { Atom } from "../../utils/atom";
+
 import {
   findGame,
   gameAddUser,
   gameRemoveUser,
-  userSelectCard,
+  gameUpdateUser,
   Game,
   GamesHash,
   gameFindUser,
-} from "../services/games";
+} from "../../services/games";
 
-import { createUser, User } from "../services/user";
-import { Atom } from "../utils/atom";
+import { createUser, User } from "../../services/user";
 
 const usersSocket: { [id: string]: { gameCode: string; userId: string } } = {};
 const rooms: { [code: string]: Socket[] } = {};
+
+const sendSocketsMessage = (
+  sockets: Socket[],
+  message: string,
+  options: Object
+) => sockets.forEach((s) => s.emit(message, options));
 
 const getContextBySocket = (
   socket: Socket
@@ -40,13 +48,18 @@ export const run = ({
       const createdUser = createUser(profile.name);
       const updatedGame = gameAddUser(game, createdUser);
 
+      console.log({ game, updatedGame });
+
       setGames(assoc(updatedGame.code, updatedGame, getGames()));
 
-      rooms[gameCode]?.forEach((socket) =>
-        socket.emit("new user", { newUser: createdUser, game: updatedGame })
-      );
+      usersSocket[socket.id] = { gameCode, userId: createdUser.id };
       rooms[gameCode] = [...(rooms[gameCode] ?? []), socket];
-      socket.emit("joined game", { game, profile: createdUser });
+      sendSocketsMessage(rooms[gameCode], "new user", {
+        newUser: createdUser,
+        game: updatedGame,
+      });
+
+      socket.emit("joined game", { game: updatedGame, profile: createdUser });
     });
 
     socket.on("disconnect", () => {
@@ -54,34 +67,33 @@ export const run = ({
       const sockets = rooms[gameCode].filter((s) => s != socket);
       const game = findGame(getGames(), gameCode);
       const user = gameFindUser(game, userId);
+      if (!user) return;
 
       const updatedGame = gameRemoveUser(game, user);
       setGames(assoc(updatedGame.code, updatedGame, getGames()));
 
       rooms[gameCode] = sockets;
-      sockets.forEach((s) => {
-        s.emit("user left", {
-          userLeft: user,
-          game: updatedGame,
-        });
+      delete usersSocket[socket.id];
+      sendSocketsMessage(sockets, "user left", {
+        userLeft: user,
+        game: updatedGame,
       });
     });
 
     socket.on("select card", ({ card }: { card: number }) => {
       const { gameCode, userId } = getContextBySocket(socket);
-      const room = rooms[gameCode];
       if (!gameCode || !userId) return;
 
-      let game: Game = findGame(getGames(), gameCode);
+      let game = findGame(getGames(), gameCode);
       const user = gameFindUser(game, userId);
-      if (game.revealed) return;
+      if (game.revealed || !user) return;
 
-      game = userSelectCard(game, user, card);
+      const updatedUser = assoc("hand", card, user);
+      game = gameUpdateUser(game, updatedUser);
       setGames(assoc(game.code, game, getGames()));
 
-      room?.forEach((s) => {
-        s.emit("user played", { user: { id: user?.id }, game });
-      });
+      const room = rooms[gameCode];
+      sendSocketsMessage(room, "user played", { user: { id: user?.id }, game });
     });
 
     socket.on("reveal cards", () => {
@@ -95,7 +107,7 @@ export const run = ({
       game.revealed = true;
       setGames(assoc(game.code, game, getGames()));
 
-      room?.forEach((s) => s.emit("game revealed", { game }));
+      sendSocketsMessage(room, "game revealed", { game });
     });
 
     socket.on("reset voting", () => {
@@ -104,19 +116,16 @@ export const run = ({
       if (!gameCode) return;
 
       const game = findGame(getGames(), gameCode);
+      const users = map(dissoc("hand"), game.users);
 
-      // TODO: Improve this please
-      game.revealed = false;
-      game.users = Object.fromEntries(
-        Object.entries(game.users).map(([index, user]: [string, User]) => [
-          index,
-          assoc("hand", undefined, user),
-        ])
-      );
+      const updatedGame = pipe(
+        assoc("revealed", false),
+        assoc("users", users)
+      )(game);
 
-      setGames(assoc(game.code, game, getGames()));
+      setGames(assoc(game.code, updatedGame, getGames()));
 
-      room?.forEach((s) => s.emit("game revealed", { game }));
+      sendSocketsMessage(room, "game revealed", { game: updatedGame });
     });
   });
 };
