@@ -9,23 +9,15 @@ import {
   gameAddUser,
   gameRemoveUser,
   gameUpdateUser,
-  Game,
   GamesHash,
   gameFindUser,
 } from "../../services/games";
 
-import { createUser, User } from "../../services/user";
+import { createUser } from "../../services/user";
 
 const usersSocket: { [id: string]: { gameCode: string; userId: string } } = {};
-const rooms: { [code: string]: Socket[] } = {};
 
-const sendSocketsMessage = (
-  sockets: Socket[],
-  message: string,
-  options: Object
-) => sockets.forEach((s) => s.emit(message, options));
-
-const getContextBySocket = (
+export const getContextBySocket = (
   socket: Socket
 ): { gameCode: string; userId: string } => usersSocket[socket.id];
 
@@ -43,28 +35,23 @@ export const run = ({
     console.log("a user connected");
 
     socket.on("join game", ({ game: { code: gameCode }, profile }) => {
-      const game = findGame(getGames(), gameCode);
+      let game = findGame(getGames(), gameCode);
 
-      const createdUser = createUser(profile.name);
-      const updatedGame = gameAddUser(game, createdUser);
+      const newUser = createUser(profile.name);
+      game = gameAddUser(game, newUser);
 
-      console.log({ game, updatedGame });
+      setGames(assoc(game.code, game, getGames()));
 
-      setGames(assoc(updatedGame.code, updatedGame, getGames()));
+      usersSocket[socket.id] = { gameCode, userId: newUser.id };
 
-      usersSocket[socket.id] = { gameCode, userId: createdUser.id };
-      rooms[gameCode] = [...(rooms[gameCode] ?? []), socket];
-      sendSocketsMessage(rooms[gameCode], "new user", {
-        newUser: createdUser,
-        game: updatedGame,
-      });
+      io.to(`game-${gameCode}`).emit("new user", { newUser, game });
 
-      socket.emit("joined game", { game: updatedGame, profile: createdUser });
+      socket.join(`game-${gameCode}`);
+      socket.emit("joined game", { game, profile: newUser });
     });
 
     socket.on("disconnect", () => {
       const { gameCode, userId } = usersSocket[socket.id];
-      const sockets = rooms[gameCode].filter((s) => s != socket);
       const game = findGame(getGames(), gameCode);
       const user = gameFindUser(game, userId);
       if (!user) return;
@@ -72,9 +59,8 @@ export const run = ({
       const updatedGame = gameRemoveUser(game, user);
       setGames(assoc(updatedGame.code, updatedGame, getGames()));
 
-      rooms[gameCode] = sockets;
       delete usersSocket[socket.id];
-      sendSocketsMessage(sockets, "user left", {
+      io.to(`game-${gameCode}`).emit("user left", {
         userLeft: user,
         game: updatedGame,
       });
@@ -85,20 +71,18 @@ export const run = ({
       if (!gameCode || !userId) return;
 
       let game = findGame(getGames(), gameCode);
-      const user = gameFindUser(game, userId);
+      let user = gameFindUser(game, userId);
       if (game.revealed || !user) return;
 
-      const updatedUser = assoc("hand", card, user);
-      game = gameUpdateUser(game, updatedUser);
+      user = assoc("hand", card, user);
+      game = gameUpdateUser(game, user);
       setGames(assoc(game.code, game, getGames()));
 
-      const room = rooms[gameCode];
-      sendSocketsMessage(room, "user played", { user: { id: user?.id }, game });
+      io.to(`game-${gameCode}`).emit("user played", { user: { id: user?.id }, game });
     });
 
     socket.on("reveal cards", () => {
       const { gameCode } = getContextBySocket(socket);
-      const room = rooms[gameCode];
       if (!gameCode) return;
 
       const game = findGame(getGames(), gameCode);
@@ -107,12 +91,11 @@ export const run = ({
       game.revealed = true;
       setGames(assoc(game.code, game, getGames()));
 
-      sendSocketsMessage(room, "game revealed", { game });
+      io.to(`game-${gameCode}`).emit("game revealed", { game });
     });
 
     socket.on("reset voting", () => {
       const { gameCode } = getContextBySocket(socket);
-      const room = rooms[gameCode];
       if (!gameCode) return;
 
       const game = findGame(getGames(), gameCode);
@@ -125,7 +108,7 @@ export const run = ({
 
       setGames(assoc(game.code, updatedGame, getGames()));
 
-      sendSocketsMessage(room, "game revealed", { game: updatedGame });
+      io.to(`game-${gameCode}`).emit("game revealed", { game: updatedGame });
     });
   });
 };
