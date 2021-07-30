@@ -1,8 +1,8 @@
 import { Server as HttpServer } from "http";
-import { assoc, chain, dissoc, ifElse, map, pipe, propEq } from "ramda";
+import { assoc, dissoc, map, pipe } from "ramda";
 import { Server, Socket } from "socket.io";
 
-import { Atom } from "../../utils/atom";
+import atom, { Atom } from "../../utils/atom";
 
 import {
   findGame,
@@ -14,12 +14,10 @@ import {
 } from "../../services/games";
 
 import { createUser } from "../../services/user";
+import { addSocketInfo, getInfoBySocket, removeSocketInfo, SocketUserInfo } from "./socketUserInfo";
 
-const usersSocket: { [id: string]: { gameCode: string; userId: string } } = {};
 
-export const getContextBySocket = (
-  socket: Socket
-): { gameCode: string; userId: string } => usersSocket[socket.id];
+const socketInfoAtom = atom({} as SocketUserInfo);
 
 export const run = ({
   server,
@@ -42,7 +40,7 @@ export const run = ({
 
       setGames(assoc(game.code, game, getGames()));
 
-      usersSocket[socket.id] = { gameCode, userId: newUser.id };
+      addSocketInfo(socketInfoAtom, socket, { gameCode, userId: newUser.id })
 
       io.to(`game-${gameCode}`).emit("new user", { newUser, game });
 
@@ -51,7 +49,7 @@ export const run = ({
     });
 
     socket.on("disconnect", () => {
-      const { gameCode, userId } = usersSocket[socket.id];
+      const { gameCode, userId } = getInfoBySocket(socketInfoAtom, socket);
       const game = findGame(getGames(), gameCode);
       const user = gameFindUser(game, userId);
       if (!user) return;
@@ -59,7 +57,8 @@ export const run = ({
       const updatedGame = gameRemoveUser(game, user);
       setGames(assoc(updatedGame.code, updatedGame, getGames()));
 
-      delete usersSocket[socket.id];
+      removeSocketInfo(socketInfoAtom, socket)
+
       io.to(`game-${gameCode}`).emit("user left", {
         userLeft: user,
         game: updatedGame,
@@ -67,7 +66,7 @@ export const run = ({
     });
 
     socket.on("select card", ({ card }: { card: number }) => {
-      const { gameCode, userId } = getContextBySocket(socket);
+      const { gameCode, userId } = getInfoBySocket(socketInfoAtom, socket);
       if (!gameCode || !userId) return;
 
       let game = findGame(getGames(), gameCode);
@@ -82,7 +81,7 @@ export const run = ({
     });
 
     socket.on("reveal cards", () => {
-      const { gameCode } = getContextBySocket(socket);
+      const { gameCode } = getInfoBySocket(socketInfoAtom, socket);
       if (!gameCode) return;
 
       const game = findGame(getGames(), gameCode);
@@ -95,7 +94,7 @@ export const run = ({
     });
 
     socket.on("reset voting", () => {
-      const { gameCode } = getContextBySocket(socket);
+      const { gameCode } = getInfoBySocket(socketInfoAtom, socket);
       if (!gameCode) return;
 
       const game = findGame(getGames(), gameCode);

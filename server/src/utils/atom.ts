@@ -15,8 +15,4 @@ const atom = <Type>(
   return [getState, setState];
 };
 
-const [getNumber, setNumber] = atom(0);
-
-getNumber();
-
 export default atom;
