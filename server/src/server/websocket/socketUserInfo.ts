@@ -8,7 +8,7 @@ export type SocketUserInfo = { [id: string]: UserInfo }
 export const getInfoBySocket = (
   [getUserInfo]: Atom<SocketUserInfo>,
   socket: Socket
-): { gameCode: string; userId: string } => getUserInfo()[socket.id];
+): UserInfo => getUserInfo()[socket.id];
 
 export const addSocketInfo = (atom: Atom<SocketUserInfo>, socket: Socket, info: UserInfo): SocketUserInfo => {
   const [getSocketInfo, setSocketInfo] = atom;
